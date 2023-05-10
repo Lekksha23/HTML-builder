@@ -10,9 +10,15 @@ fs.readdir(cssPath, { withFileTypes: true }, (err, directories) => {
         let str = file.name.split('.');
         if (str[1] === 'css') {
             const input = fs.createReadStream(path.join(__dirname, 'styles', file.name));
-            input.on('data', data => {
-                fs.createWriteStream(bundlePath).write(data.toString() + '\n');
-            });
+            const output = fs.createWriteStream(bundlePath, {flags:'a'});
+            input.pipe(output);
+            output.on('end', () => 
+                fs.appendFile(bundlePath, '\n', (err) => { 
+                    if (err) { 
+                        throw err;  
+                    }
+                })
+            );
         }
     });
 });
